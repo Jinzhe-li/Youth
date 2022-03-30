@@ -1,0 +1,59 @@
+{
+    "pages" : [
+        // {
+        //     "path" : "pages/index/index",
+        //     "style" : {
+        //         "navigationBarTitleText" : "uni-app"
+        //     }
+        // },
+        {
+            "path" : "pages/mainPage/home",
+            "style" : {}
+        },
+        {
+            "path" : "pages/mainPage/sport",
+            "style" : {}
+        },
+        {
+            "path" : "pages/mainPage/planList",
+            "style" : {}
+        },
+        {
+            "path" : "pages/mainPage/plan",
+            "style" : {}
+        },
+        {
+            "path" : "pages/mainPage/community",
+            "style" : {}
+        },
+        {
+            "path" : "pages/mainPage/user",
+            "style" : {}
+        },
+        {
+            "path" : "pages/mainPage/exam",
+            "style" : {}
+        },
+        {
+            "path" : "pages/mainPage/paizhao/paizhao",
+            "style" : {
+                "navigationBarTitleText" : "",
+                "enablePullDownRefresh" : false
+            }
+        },
+        {
+            "path" : "pages/mainPage/paizhao",
+            "style" : {}
+        }
+    ],
+    "globalStyle" : {
+        "navigationBarTextStyle" : "black",
+        "navigationBarTitleText" : "uni-app",
+        "navigationBarBackgroundColor" : "#F8F8F8",
+        "backgroundColor" : "#F8F8F8",
+        "app-plus" : {
+            "background" : "#efeff4",
+            "titleNView" : false
+        }
+    }
+}

@@ -1,0 +1,180 @@
+<template>
+	<view>
+		<view class="account-form">
+			<view class="uni-form-item">
+				<view class="uni-input-wrapper">
+					<view class="uni-label uni-label-must">直播间标题</view>
+					<input class="uni-input" placeholder="请输入直播间标题" :value="form.liveroomTitle" @input="changeInput($event,'liveroomTitle')"/>
+				</view>
+			</view>
+		</view>
+		<button class="cu-btn bg-red margin-tb-sm lg" v-if="!startState" @click="saveForm">开始直播</button>
+		<button class="cu-btn bg-red margin-tb-sm lg" v-if="startState" @click="downcast">关闭直播</button>
+		<button class="cu-btn bg-red margin-tb-sm lg" @click="switchCamera">切换摄像头</button>
+		<live-pusher
+			id="livePusher"
+			ref="livePusher"
+			:style="pusherCalss"
+			class="livePusher"
+			url="rtmp://192.168.1.171:17002/live/huahua"
+			mode="FHD"
+			:muted="false"
+			:enable-camera="true"
+			:auto-focus="true"
+			:beauty="1"
+			whiteness="2"
+			aspect="9:16"
+			@statechange="statechange"
+			@netstatus="netstatus"
+			@error="error"
+		></live-pusher>
+		<button class="btn" @click="start">开始推流</button>
+		<button class="btn" @click="pause">暂停推流</button>
+		<button class="btn" @click="resume">resume</button>
+		<button class="btn" @click="stop">停止推流</button>
+		<button class="btn" @click="snapshot">快照</button>
+		<button class="btn" @click="startPreview">开启摄像头预览</button>
+		<button class="btn" @click="stopPreview">关闭摄像头预览</button>
+		<button class="btn" @click="switchCamera">切换摄像头</button> -->
+	</view>
+</template>
+
+<script>
+export default {
+	data() {
+		return {
+			// 视频宽高
+			pusherCalss: {
+				width: '200px',
+				height: '300px'
+			},
+			// form本人测试请求的参数，不发请求可以不加
+			form: {
+				liveroomTitle: null, // 标题
+				equipmentType: 1 // 设备类型（1.手机 2.电脑）
+			},
+			// 控制开启，关闭直播按钮的显示
+			startState: false,// 直播状态（false 关闭）
+		};
+	},
+	onReady() {
+		// 注意：需要在onReady中 或 onLoad 延时
+		this.context = uni.createLivePusherContext('livePusher', this);
+	},
+	onLoad() {
+		// 获取可视区域高度，减去固定高度
+		this.pusherCalss.width = wx.getSystemInfoSync().windowWidth;
+		this.pusherCalss.height = wx.getSystemInfoSync().windowHeight;
+	},
+	mounted() {
+		// 一进页面，先调用摄像头，保证摄像头是打开状态，不加也可以，手动开启，参考上面官方给出的那些按钮
+		this.startPreview();
+	},
+	methods: {
+		// 下面的这些方法，可以参考官网，具体查看每个方法的意义
+		statechange(e) {
+			console.log('statechange:' + JSON.stringify(e));
+		},
+		netstatus(e) {
+			console.log('netstatus:' + JSON.stringify(e));
+		},
+		error(e) {
+			console.log('error:' + JSON.stringify(e));
+		},
+		start: function() {
+			this.context.start({
+				success: a => {
+					this.startState = true;
+					console.log('livePusher.start:' + JSON.stringify(a));
+				}
+			});
+		},
+		close: function() {
+			this.context.close({
+				success: a => {
+					console.log('livePusher.close:' + JSON.stringify(a));
+				}
+			});
+		},
+		snapshot: function() {
+			this.context.snapshot({
+				success: e => {
+					console.log(JSON.stringify(e));
+				}
+			});
+		},
+		resume: function() {
+			this.context.resume({
+				success: a => {
+					console.log('livePusher.resume:' + JSON.stringify(a));
+				}
+			});
+		},
+		pause: function() {
+			this.context.pause({
+				success: a => {
+					console.log('livePusher.pause:' + JSON.stringify(a));
+				}
+			});
+		},
+		stop: function() {
+			this.context.stop({
+				success: a => {
+					this.startState = false;
+					console.log(JSON.stringify(a));
+				}
+			});
+		},
+		switchCamera: function() {
+			this.context.switchCamera({
+				success: a => {
+					console.log('livePusher.switchCamera:' + JSON.stringify(a));
+				}
+			});
+		},
+		startPreview: function() {
+			this.context.startPreview({
+				success: a => {
+					console.log('livePusher.startPreview:' + JSON.stringify(a));
+				}
+			});
+		},
+		stopPreview: function() {
+			this.context.stopPreview({
+				success: a => {
+					console.log('livePusher.stopPreview:' + JSON.stringify(a));
+				}
+			});
+		},
+		// 输入框改变（没有接口可以忽略，这里就是发送请求时起一个直播间的名字）
+		changeInput: function(e, name) {
+			this.form[name] = e.detail.value;
+		},
+		// 开始直播
+		saveForm() {
+			if(this.form.liveroomTitle == null || this.form.liveroomTitle == ""){
+				return;
+			}
+			// 这里是我自己的测试请求，因为需要和vue数据同步，做一个开播关播的数据交互，大家如果用不到的话可以直接调用 this.start();
+			getApp().$util.requestUrl(`/test/live/createLiveRecord?anchorId=2&liveroomTitle=${this.form.liveroomTitle}&equipmentType=${this.form.equipmentType}`).then(res => {
+				console.log(res)
+				if (res.status == 200) {
+					this.start();
+				}
+			});
+		},
+		// 关闭直播
+		downcast(){
+			// 同样，用不到接口只简单测试，调用this.stop();
+			// vue的工具类等调用是this.$util；
+			// uniapp使用getApp().$util
+			getApp().$util.requestUrl(`/test/live/downcast?anchorId=2`).then(res => {
+				console.log(res)
+				if (res.status == 200) {
+					this.stop();
+				}
+			});
+		}
+	}
+};
+</script>
